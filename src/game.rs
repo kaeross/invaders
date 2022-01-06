@@ -1,4 +1,9 @@
-use std::{error::Error, sync::mpsc::Sender, thread, time::Duration};
+use std::{
+    error::Error,
+    sync::mpsc::Sender,
+    thread,
+    time::{Duration, Instant},
+};
 
 use crossterm::event::{self, Event, KeyCode};
 use rusty_audio::Audio;
@@ -11,9 +16,13 @@ use crate::{
 
 pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dyn Error>> {
     let mut player = Player::new();
+    let mut instant = Instant::now();
 
     'gameloop: loop {
         // Per frame init
+        let delta = instant.elapsed();
+        instant = Instant::now();
+
         let mut curr_frame = new_frame();
 
         // Input
@@ -22,6 +31,11 @@ pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dy
                 match key_event.code {
                     KeyCode::Left => player.move_left(),
                     KeyCode::Right => player.move_right(),
+                    KeyCode::Char(' ') | KeyCode::Enter => {
+                        if player.shoot() {
+                            play_game_sound(audio, Sounds::Pew);
+                        }
+                    }
                     KeyCode::Esc | KeyCode::Char('q') => {
                         play_game_sound(audio, Sounds::Lose);
                         break 'gameloop;
@@ -30,6 +44,9 @@ pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dy
                 }
             }
         }
+
+        // Updates
+        player.update(delta);
 
         // Draw & render
         player.draw(&mut curr_frame);

@@ -1,34 +1,25 @@
 use crossterm::{
     cursor::{Hide, Show},
-    event,
-    event::{Event, KeyCode},
     terminal,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
 use invaders::{
-    frame::{self, new_frame, Frame},
-    render,
+    audio::{load_audio, play_game_sound, Sounds},
+    frame::{self, Frame},
+    game, render,
 };
-use rusty_audio::Audio;
+
 use std::{
     error::Error,
     sync::mpsc::{channel, Receiver, Sender},
     thread::JoinHandle,
-    time::Duration,
 };
 use std::{io, thread};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let mut audio = Audio::new();
-    audio.add("explode", "sounds/explode.mp3");
-    audio.add("lose", "sounds/lose.mp3");
-    audio.add("move", "sounds/move.mp3");
-    audio.add("pew", "sounds/pew.mp3");
-    audio.add("startup", "sounds/startup.mp3");
-    audio.add("win", "sounds/win.mp3");
-
-    audio.play("startup");
+    let mut audio = load_audio();
+    play_game_sound(&mut audio, Sounds::Startup);
 
     // Terminal
     let stdout = init_terminal()?;
@@ -38,27 +29,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let render_handle = render_handle(receiver);
 
     // Game loop
-    'gameloop: loop {
-        // Per frame init
-        let curr_frame = new_frame();
-
-        // Input
-        while event::poll(Duration::default())? {
-            if let Event::Key(key_event) = event::read()? {
-                match key_event.code {
-                    KeyCode::Esc | KeyCode::Char('q') => {
-                        audio.play("lose");
-                        break 'gameloop;
-                    }
-                    _ => {}
-                }
-            }
-        }
-
-        // Draw & render
-        let _ = sender.send(curr_frame);
-        thread::sleep(Duration::from_millis(1));
-    }
+    game::game_loop(&mut audio, &sender)?;
 
     // Cleanup
     cleanup(audio, stdout, sender, render_handle)

@@ -1,4 +1,7 @@
+pub mod audio;
 pub mod frame;
+pub mod game;
+pub mod player;
 pub mod render;
 
 pub const NUM_ROWS: usize = 20;

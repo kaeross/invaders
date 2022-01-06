@@ -11,12 +11,14 @@ use rusty_audio::Audio;
 use crate::{
     audio::{play_game_sound, Sounds},
     frame::{new_frame, Drawable, Frame},
+    invaders::Invaders,
     player::Player,
 };
 
 pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dyn Error>> {
     let mut player = Player::new();
     let mut instant = Instant::now();
+    let mut invaders = Invaders::new();
 
     'gameloop: loop {
         // Per frame init
@@ -47,9 +49,17 @@ pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dy
 
         // Updates
         player.update(delta);
+        if invaders.update(delta) {
+            play_game_sound(audio, Sounds::Move);
+        }
 
         // Draw & render
-        player.draw(&mut curr_frame);
+        let drawables: Vec<&dyn Drawable> = vec![&player, &invaders];
+
+        for drawable in drawables {
+            drawable.draw(&mut curr_frame);
+        }
+
         let _ = sender.send(curr_frame);
         thread::sleep(Duration::from_millis(1));
     }

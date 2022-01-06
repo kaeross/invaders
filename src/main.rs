@@ -4,6 +4,7 @@ use crossterm::{
     terminal::{EnterAlternateScreen, LeaveAlternateScreen},
     ExecutableCommand,
 };
+
 use invaders::{
     audio::{load_audio, play_game_sound, Sounds},
     frame::{self, Frame},

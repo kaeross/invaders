@@ -1,6 +1,7 @@
 use std::{cmp::max, time::Duration};
 
 use rusty_time::prelude::Timer;
+use terminal_emoji::Emoji;
 
 use crate::{
     frame::{Drawable, Frame},
@@ -27,7 +28,7 @@ impl Invaders {
                 if (x > 1)
                     && (x < NUM_COLS - 2)
                     && (y > 0)
-                    && (y < NUM_INVADER_ROWS)
+                    && (y <= (NUM_INVADER_ROWS * 2))
                     && (x % 2 == 0)
                     && (y % 2 == 0)
                 {
@@ -111,15 +112,15 @@ impl Invaders {
 }
 
 impl Drawable for Invaders {
-    fn draw(&self, frame: &mut Frame) {
+    fn draw<T>(&self, frame: &mut Frame<T>) {
         for invader in self.army.iter() {
             let time_left = self.move_timer.time_left.as_secs_f32();
             let timer_duration = self.move_timer.duration.as_secs_f32();
 
             frame[invader.x][invader.y] = if (time_left / timer_duration) < 0.5 {
-                "x"
+                Emoji::new("U+1F47E", "x")
             } else {
-                "+"
+                Emoji::new("U+1F47E", "+")
             };
         }
     }

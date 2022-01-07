@@ -65,7 +65,7 @@ impl Player {
 }
 
 impl Drawable for Player {
-    fn draw(&self, frame: &mut Frame) {
+    fn draw(&self, frame: &mut Frame<str>) {
         frame[self.x][self.y] = "A";
 
         for shot in self.shots.iter() {

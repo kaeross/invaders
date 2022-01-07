@@ -9,7 +9,7 @@ use crossterm::{
 
 use crate::frame::Frame;
 
-pub fn render(stdout: &mut Stdout, last_frame: &Frame, curr_frame: &Frame, force: bool) {
+pub fn render<T>(stdout: &mut Stdout, last_frame: &Frame<T>, curr_frame: &Frame<T>, force: bool) {
     if force {
         stdout.queue(SetBackgroundColor(Color::Grey)).unwrap();
         stdout.queue(Clear(ClearType::All)).unwrap();

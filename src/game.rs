@@ -15,7 +15,7 @@ use crate::{
     player::Player,
 };
 
-pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dyn Error>> {
+pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame<str>>) -> Result<(), Box<dyn Error>> {
     let mut player = Player::new();
     let mut instant = Instant::now();
     let mut invaders = Invaders::new();

@@ -49,6 +49,11 @@ pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dy
 
         // Updates
         player.update(delta);
+
+        if player.detect_hits(&mut invaders) {
+            play_game_sound(audio, Sounds::Explode);
+        }
+
         if invaders.update(delta) {
             play_game_sound(audio, Sounds::Move);
         }
@@ -62,6 +67,17 @@ pub fn game_loop(audio: &mut Audio, sender: &Sender<Frame>) -> Result<(), Box<dy
 
         let _ = sender.send(curr_frame);
         thread::sleep(Duration::from_millis(1));
+
+        // Win or lose
+        if invaders.all_killed() {
+            play_game_sound(audio, Sounds::Win);
+            break 'gameloop;
+        }
+
+        if invaders.reached_bottom() {
+            play_game_sound(audio, Sounds::Lose);
+            break 'gameloop;
+        }
     }
 
     Ok(())
